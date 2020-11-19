@@ -55,3 +55,27 @@ def obter_diagonal(tab, num_diagonal):
 		diag = diag + (col[i if num_diagonal != 2 else len(col) - i - 1],)
 	
 	return diag
+
+def peca_str(peca): # aux
+	if peca == 1:
+		return 'X'
+	elif peca == -1:
+		return 'O'
+	else:
+		return ' '
+
+def tabuleiro_str(tab):
+	if not eh_tabuleiro(tab):
+		raise ValueError("tableiro_str: o argumento e invalido")
+
+	res = ""
+	for i in range(len(tab)):
+		if i > 0:
+			res = res + "\n-----------\n"
+		linha = tab[i]
+		for j in range(len(linha)):
+			if j > 0:
+				res = res + "|"
+			res = res + " " + peca_str(linha[j]) + " "
+
+	return res
