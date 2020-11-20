@@ -165,7 +165,7 @@ def jogador_ganhador(tab):
 
 	return 0
 
-def eh_jogador(jogador):
+def eh_jogador(jogador): # aux
 	return isinstance(jogador, int) and abs(jogador) == 1
 
 def marcar_posicao(tab, jogador, pos):
@@ -186,3 +186,119 @@ def marcar_posicao(tab, jogador, pos):
 		novo_tab = novo_tab + (linha,)
 
 	return novo_tab
+
+def escolher_posicao_manual(tab):
+	if not eh_tabuleiro(tab):
+		raise ValueError("escolher_posicao_manual: o argumento e invalido")
+
+	escolha = int(input('Turno do jogador. Escolha uma posicao livre: '))
+
+	if not (eh_posicao(escolha) and eh_posicao_livre(tab, escolha)):
+		raise ValueError("escolher_posicao_manual: " \
+			+ "a posicao introduzida e invalida")
+
+	return escolha
+
+def eh_estrategia(estrategia): # aux
+	return isinstance(estrategia, str) and estrategia in (
+		'basico',
+		'normal',
+		'perfeito'
+	)
+
+def criterio_vitoria(tab, jogador): # aux
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
+		raise ValueError("criterio_vitoria: algum dos argumentos e invalido")
+
+	# TODO
+	return 1
+
+def criterio_bloqueio(tab, jogador): # aux
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
+		raise ValueError("criterio_bloqueio: algum dos argumentos e invalido")
+
+	# TODO
+	return 1
+
+def criterio_bifurcacao(tab, jogador): # aux
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
+		raise ValueError("criterio_bifurcacao: algum dos argumentos e invalido")
+
+	# TODO
+	return 1
+
+def criterio_bloqueio_bifurcacao(tab, jogador): # aux
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
+		raise ValueError("criterio_bloqueio_bifurcacao: " + \
+			"algum dos argumentos e invalido")
+
+	# TODO
+	return 1
+
+def criterio_centro(tab, jogador): # aux
+	if not eh_tabuleiro(tab):
+		raise ValueError("criterio_centro: o argumento e invalido")
+
+	centro = (DIMENSAO_TABULEIRO ** 2) // 2 + 1
+	if eh_posicao_livre(tab, centro):
+		return centro
+
+def criterio_canto_oposto(tab, jogador): # aux
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
+		raise ValueError("criterio_canto_oposto: " + \
+			"algum dos argumentos e invalido")
+
+	# TODO
+	return 1
+
+def criterio_canto_vazio(tab, jogador): # aux
+	if not eh_tabuleiro(tab):
+		raise ValueError("criterio_canto_vazio: o argumento e invalido")
+
+	cantos = ( # por ordem de posicao
+		1,
+		DIMENSAO_TABULEIRO,
+		DIMENSAO_TABULEIRO * (DIMENSAO_TABULEIRO - 1),
+		DIMENSAO_TABULEIRO ** 2,
+	)
+
+	for pos in cantos:
+		if eh_posicao_livre(tab, pos):
+			return pos
+
+def criterio_lateral_vazio(tab, jogador): # aux
+	if not eh_tabuleiro(tab):
+		raise ValueError("criterio_lateral_vazio: o argumento e invalido")
+
+	#TODO
+	return 1
+
+def escolher_posicao_auto(tab, jogador, estrategia):
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador) \
+		and eh_estrategia(estrategia)):
+		raise ValueError("escolher_posicao_auto: " + \
+			"algum dos argumentos e invalido")
+	
+	crits_perfeitos = estrategia == "perfeito"
+	crits_normais = crits_perfeitos or estrategia == "normal"
+	crits_basicos = crits_normais or estrategia == "basico"
+
+	criterios = (
+		# tentar aplicar (bool), criterio (function)
+		(crits_normais, criterio_vitoria),
+		(crits_normais, criterio_bloqueio),
+		(crits_perfeitos, criterio_bifurcacao),
+		(crits_perfeitos, criterio_bloqueio_bifurcacao),
+		(crits_basicos, criterio_centro),
+		(crits_normais, criterio_canto_oposto),
+		(crits_basicos, criterio_canto_vazio),
+		(crits_basicos, criterio_lateral_vazio)
+	)
+
+	for el in criterios:
+		if el[0]:
+			pos = (el[1])(tab, jogador)
+			if pos:
+				return pos
+	
+	raise RuntimeError("escolher_posicao_auto: nenhum criterio foi aplicado")
