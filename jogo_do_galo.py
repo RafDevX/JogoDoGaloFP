@@ -6,7 +6,7 @@
 # jogador: -1, 0, 1
 # simbolo: O, _, X (espaço para vazio)
 
-DIMENSAO_TABULEIRO = 3 # Quantas celulas ha em cada linha/coluna do tabuleiro
+DIMENSAO_TABULEIRO = 3 # Quantas celulas ha em cada linha/coluna/diagonal
 
 def eh_vetor(tab): # aux
 	if isinstance(tab, tuple):
@@ -206,12 +206,54 @@ def eh_estrategia(estrategia): # aux
 		'perfeito'
 	)
 
+def obter_centro(): # aux
+	return (DIMENSAO_TABULEIRO ** 2) // 2 + 1 # posicao
+
+def obter_cantos(): # aux
+	return ( # por ordem de posicao
+		1,
+		DIMENSAO_TABULEIRO,
+		DIMENSAO_TABULEIRO * (DIMENSAO_TABULEIRO - 1),
+		DIMENSAO_TABULEIRO ** 2,
+	)
+
+def obter_indice_para_completar_vetor(vetor, jogador): # aux
+	if not (eh_vetor(vetor) and eh_jogador(jogador)):
+		raise ValueError("obter_indice_para_completar_vetor: " \
+			+ "algum dos argumentos e invalido")
+	
+	ind = None
+	for j in range(len(vetor)):
+		if vetor[j] == 0:
+			if ind is None:
+				return None
+			else:
+				ind = j
+		elif vetor[j] != jogador:
+			return None
+	
+	return ind
+
 def criterio_vitoria(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_vitoria: algum dos argumentos e invalido")
 
-	# TODO
-	return 1
+	for i in range(1, DIMENSAO_TABULEIRO):
+		linha = obter_linha(tab, i)
+		ind = obter_indice_para_completar_vetor(linha, jogador)
+		if ind is not None:
+			return ind + 1 + (i - 1) * DIMENSAO_TABULEIRO
+		
+		col = obter_coluna(tab, i)
+		ind = obter_indice_para_completar_vetor(col, jogador)
+		if ind is not None:
+			return ind
+	
+	for i in range(1, 3):
+		diag = obter_diagonal(tab, i)
+		ind = obter_indice_para_completar_vetor(diag, jogador)
+		if ind is not None:
+			return ind
 
 def criterio_bloqueio(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
@@ -239,7 +281,7 @@ def criterio_centro(tab, jogador): # aux
 	if not eh_tabuleiro(tab):
 		raise ValueError("criterio_centro: o argumento e invalido")
 
-	centro = (DIMENSAO_TABULEIRO ** 2) // 2 + 1
+	centro = obter_centro()
 	if eh_posicao_livre(tab, centro):
 		return centro
 
@@ -255,12 +297,7 @@ def criterio_canto_vazio(tab, jogador): # aux
 	if not eh_tabuleiro(tab):
 		raise ValueError("criterio_canto_vazio: o argumento e invalido")
 
-	cantos = ( # por ordem de posicao
-		1,
-		DIMENSAO_TABULEIRO,
-		DIMENSAO_TABULEIRO * (DIMENSAO_TABULEIRO - 1),
-		DIMENSAO_TABULEIRO ** 2,
-	)
+	cantos = obter_cantos()
 
 	for pos in cantos:
 		if eh_posicao_livre(tab, pos):
@@ -270,8 +307,12 @@ def criterio_lateral_vazio(tab, jogador): # aux
 	if not eh_tabuleiro(tab):
 		raise ValueError("criterio_lateral_vazio: o argumento e invalido")
 
-	#TODO
-	return 1
+	cantos = obter_cantos()
+	centro = obter_centro()
+
+	for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
+		if pos != centro and (pos not in cantos) and eh_posicao_livre(tab, pos):
+			return pos
 
 def escolher_posicao_auto(tab, jogador, estrategia):
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador) \
