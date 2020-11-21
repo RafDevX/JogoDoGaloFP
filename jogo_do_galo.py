@@ -9,10 +9,10 @@
 DIMENSAO_TABULEIRO = 3 # Quantas celulas ha em cada linha/coluna/diagonal
 
 def eh_vetor(tab): # aux
-	if isinstance(tab, tuple):
+	if type(tab) == tuple:
 		if len(tab) == DIMENSAO_TABULEIRO:
 			for el in tab:
-				if not isinstance(el, int):
+				if type(el) != int:
 					return False
 				elif abs(el) > 1:
 					return False
@@ -22,7 +22,7 @@ def eh_vetor(tab): # aux
 	return False
 
 def eh_tabuleiro(tab):
-	if isinstance(tab, tuple):
+	if type(tab) == tuple:
 		if len(tab) == DIMENSAO_TABULEIRO:
 			for el in tab:
 				if not eh_vetor(el):
@@ -32,10 +32,10 @@ def eh_tabuleiro(tab):
 	return False
 
 def eh_posicao(pos):
-	return isinstance(pos, int) and 1 <= pos <= (DIMENSAO_TABULEIRO ** 2)
+	return type(pos) == int and 1 <= pos <= (DIMENSAO_TABULEIRO ** 2)
 
 def eh_numero_de_vetor(num): # aux
-	return isinstance(num, int) and 1 <= num <= DIMENSAO_TABULEIRO
+	return type(num) == int and 1 <= num <= DIMENSAO_TABULEIRO
 
 def obter_coluna(tab, num_col):
 	if not (eh_tabuleiro(tab) and eh_numero_de_vetor(num_col)):
@@ -152,7 +152,7 @@ def jogador_ganhador(tab):
 	return 0
 
 def eh_jogador(jogador): # aux
-	return isinstance(jogador, int) and abs(jogador) == 1
+	return type(jogador) == int and abs(jogador) == 1
 
 def marcar_posicao(tab, jogador, pos):
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador) \
@@ -186,7 +186,7 @@ def escolher_posicao_manual(tab):
 	return escolha
 
 def eh_estrategia(estrategia): # aux
-	return isinstance(estrategia, str) and estrategia in (
+	return type(estrategia) == str and estrategia in (
 		'basico',
 		'normal',
 		'perfeito'
@@ -253,7 +253,7 @@ def criterio_bifurcacao(tab, jogador): # aux
 		return bifurcacoes[0]
 
 def obter_posicao_de_coordenadas(coords): # aux
-	if not (isinstance(coords, tuple) and len(coords) == 2 \
+	if not (type(coords) == tuple and len(coords) == 2 \
 		and 0 <= coords[0] <= DIMENSAO_TABULEIRO - 1 \
 		and 0 <= coords[1] <= DIMENSAO_TABULEIRO - 1):
 		raise ValueError("obter_posicao_de_coordenadas: o argumento e invalido")
@@ -371,7 +371,7 @@ def escolher_posicao_auto(tab, jogador, estrategia):
 	raise RuntimeError("escolher_posicao_auto: nenhum criterio foi aplicado")
 
 def eh_simbolo(simbolo):
-	return isinstance(simbolo, str) and simbolo in ('X', 'O')
+	return type(simbolo) == str and simbolo in ('X', 'O')
 
 def converter_simbolo_em_jogador(simbolo):
 	if not eh_simbolo(simbolo):
