@@ -60,7 +60,8 @@ def obter_linha(tab, num_linha):
 	return tab[num_linha - 1]
 
 def obter_diagonal(tab, num_diagonal):
-	if not (eh_tabuleiro(tab) and 1 <= num_diagonal <= 2):
+	if not (eh_tabuleiro(tab) and type(num_diagonal) == int \
+		and 1 <= num_diagonal <= 2):
 		raise ValueError("obter_diagonal: algum dos argumentos e invalido")
 
 	diag = ()
@@ -80,7 +81,7 @@ def simbolo_str(jogador): # aux
 
 def tabuleiro_str(tab):
 	if not eh_tabuleiro(tab):
-		raise ValueError("tableiro_str: o argumento e invalido")
+		raise ValueError("tabuleiro_str: o argumento e invalido")
 
 	res = ""
 	for i in range(len(tab)):
