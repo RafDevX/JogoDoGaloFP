@@ -4,7 +4,7 @@
 # vetor: linha ou coluna
 # posicao: 1 ... 9 (para dimensao = 3)
 # jogador: -1, 0, 1
-# simbolo: O, _, X (espaço para vazio)
+# simbolo: O, _, X (espaco para vazio)
 
 DIMENSAO_TABULEIRO = 3 # Quantas celulas ha em cada linha/coluna/diagonal
 
