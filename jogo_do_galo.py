@@ -71,7 +71,7 @@ def obter_diagonal(tab, num_diagonal):
 	
 	return diag
 
-def simbolo_str(jogador): # aux
+def converter_jogador_em_simbolo(jogador): # aux
 	if jogador == 1:
 		return 'X'
 	elif jogador == -1:
@@ -91,7 +91,7 @@ def tabuleiro_str(tab):
 		for j in range(len(linha)):
 			if j > 0:
 				res = res + "|"
-			res = res + " " + simbolo_str(linha[j]) + " "
+			res = res + " " + converter_jogador_em_simbolo(linha[j]) + " "
 
 	return res
 
@@ -259,7 +259,7 @@ def criterio_bifurcacao(tab, jogador): # aux
 	if len(bifurcacoes) > 0:
 		return bifurcacoes[0]
 
-def obter_posicao_de_coordenadas(coords): # aux
+def obter_posicao(coords): # aux
 	if not (type(coords) == tuple and len(coords) == 2 \
 		and 0 <= coords[0] <= DIMENSAO_TABULEIRO - 1 \
 		and 0 <= coords[1] <= DIMENSAO_TABULEIRO - 1):
@@ -277,7 +277,7 @@ def obter_posicoes_adjacentes(pos): # aux
 		if 0 <= i <= (DIMENSAO_TABULEIRO - 1):
 			for j in range(coords[1] - 1, coords[1] + 2):
 				if 0 <= j <= (DIMENSAO_TABULEIRO - 1) and (i, j) != coords:
-					p = obter_posicao_de_coordenadas((i, j))
+					p = obter_posicao((i, j))
 					if p not in adjs:
 						adjs = adjs + (p,)
 	
@@ -415,7 +415,7 @@ def jogo_do_galo(simbolo_humano, estrategia):
 
 		ganhador = jogador_ganhador(tabuleiro)
 		if ganhador:
-			return simbolo_str(ganhador)
+			return converter_jogador_em_simbolo(ganhador)
 		elif len(obter_posicoes_livres(tabuleiro)) == 0:
 			return 'EMPATE'
 		
