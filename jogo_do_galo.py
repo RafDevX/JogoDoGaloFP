@@ -226,19 +226,18 @@ def obter_indice_para_completar_vetor(vetor, jogador): # aux
 	for j in range(len(vetor)):
 		if vetor[j] == 0:
 			if ind is None:
-				return None
-			else:
 				ind = j
+			else:
+				return None
 		elif vetor[j] != jogador:
 			return None
-	
 	return ind
 
 def criterio_vitoria(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_vitoria: algum dos argumentos e invalido")
 
-	for i in range(1, DIMENSAO_TABULEIRO):
+	for i in range(1, DIMENSAO_TABULEIRO + 1):
 		linha = obter_linha(tab, i)
 		ind = obter_indice_para_completar_vetor(linha, jogador)
 		if ind is not None:
@@ -247,13 +246,17 @@ def criterio_vitoria(tab, jogador): # aux
 		col = obter_coluna(tab, i)
 		ind = obter_indice_para_completar_vetor(col, jogador)
 		if ind is not None:
-			return ind
+			return i + ind * DIMENSAO_TABULEIRO
 	
-	for i in range(1, 3):
-		diag = obter_diagonal(tab, i)
-		ind = obter_indice_para_completar_vetor(diag, jogador)
-		if ind is not None:
-			return ind
+	diag1 = obter_diagonal(tab, 1)
+	ind = obter_indice_para_completar_vetor(diag1, jogador)
+	if ind is not None:
+		return 1 + ind * (DIMENSAO_TABULEIRO + 1)
+
+	diag2 = obter_diagonal(tab, 2)
+	ind = obter_indice_para_completar_vetor(diag2, jogador)
+	if ind is not None:
+		return 1 + (DIMENSAO_TABULEIRO - ind) * (DIMENSAO_TABULEIRO - 1)
 
 def criterio_bloqueio(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
