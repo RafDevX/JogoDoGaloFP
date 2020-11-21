@@ -8,6 +8,9 @@
 
 DIMENSAO_TABULEIRO = 3 # Quantas celulas ha em cada linha/coluna/diagonal
 
+# Algumas funcoes podiam ser variaveis globais, mas o prof. Joao Martins Pavao
+# pediu para ter o minimo de variaveis globais possiveis
+
 def eh_vetor(tab): # aux
 	if type(tab) == tuple:
 		if len(tab) == DIMENSAO_TABULEIRO:
@@ -31,8 +34,11 @@ def eh_tabuleiro(tab):
 			return True
 	return False
 
+def obter_posicoes(): # aux
+	return range(1, DIMENSAO_TABULEIRO ** 2 + 1)
+
 def eh_posicao(pos):
-	return type(pos) == int and 1 <= pos <= (DIMENSAO_TABULEIRO ** 2)
+	return type(pos) == int and pos in obter_posicoes()
 
 def eh_numero_de_vetor(num): # aux
 	return type(num) == int and 1 <= num <= DIMENSAO_TABULEIRO
@@ -115,7 +121,7 @@ def obter_posicoes_livres(tab):
 		raise ValueError("obter_posicoes_livres: o argumento e invalido")
 
 	livres = ()
-	for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
+	for pos in obter_posicoes():
 		if eh_posicao_livre(tab, pos):
 			livres = livres + (pos,)
 	
@@ -207,7 +213,7 @@ def criterio_vitoria(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_vitoria: algum dos argumentos e invalido")
 
-	for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
+	for pos in obter_posicoes():
 		if eh_posicao_livre(tab, pos) \
 			and jogador_ganhador(marcar_posicao(tab, jogador, pos)) == jogador:
 			return pos
@@ -224,7 +230,7 @@ def obter_bifurcacoes(tab, jogador): # aux
 
 	cantos = obter_cantos()
 	bifurcacoes = ()
-	for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
+	for pos in obter_posicoes():
 		if eh_posicao_livre(tab, pos):
 			coords = obter_coordenadas(pos)
 			linha = obter_linha(tab, coords[0] + 1)
@@ -287,7 +293,7 @@ def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 		return bifurcacoes[0]
 	elif lb > 1:
 		posicoes_para_2_em_linha = ()
-		for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
+		for pos in obter_posicoes():
 			if obter_jogador(tab, pos) == jogador:
 				for adj in obter_posicoes_adjacentes(pos):
 					if eh_posicao_livre(tab, adj) \
@@ -336,7 +342,7 @@ def criterio_lateral_vazio(tab, jogador): # aux
 	cantos = obter_cantos()
 	centro = obter_centro()
 
-	for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
+	for pos in obter_posicoes():
 		if pos != centro and (pos not in cantos) and eh_posicao_livre(tab, pos):
 			return pos
 
