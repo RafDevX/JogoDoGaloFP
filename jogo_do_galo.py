@@ -137,14 +137,10 @@ def vetor_ganhador(vetor): # aux
 
 	jogador = vetor[0]
 
-	if jogador == 0:
+	if (jogador != 0) and (vetor == (jogador,) * len(vetor)):
+		return jogador
+	else:
 		return 0
-	
-	for i in range(1, len(vetor)):
-		if vetor[i] != vetor[0]:
-			return 0
-	
-	return jogador
 
 def jogador_ganhador(tab):
 	if not eh_tabuleiro(tab):
@@ -213,7 +209,7 @@ def obter_cantos(): # aux
 	return ( # por ordem de posicao
 		1,
 		DIMENSAO_TABULEIRO,
-		DIMENSAO_TABULEIRO * (DIMENSAO_TABULEIRO - 1),
+		DIMENSAO_TABULEIRO * (DIMENSAO_TABULEIRO - 1) + 1,
 		DIMENSAO_TABULEIRO ** 2,
 	)
 
@@ -262,23 +258,28 @@ def criterio_bloqueio(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_bloqueio: algum dos argumentos e invalido")
 
-	# TODO
-	return 1
+	return criterio_vitoria(tab, -jogador)
 
 def criterio_bifurcacao(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_bifurcacao: algum dos argumentos e invalido")
 
-	# TODO
-	return 1
+	cantos = obter_cantos()
+	for canto in cantos:
+		if eh_posicao_livre(tab, canto):
+			coords = obter_coordenadas(canto)
+			linha = obter_linha(tab, coords[0] + 1)
+			col = obter_coluna(tab, coords[1] + 1)
+			if linha.count(0) == 2 and col.count(0) == 2 \
+				and linha.count(-jogador) == 0 and col.count(-jogador) == 0:
+				return canto
 
 def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_bloqueio_bifurcacao: " + \
 			"algum dos argumentos e invalido")
 
-	# TODO
-	return 1
+	return criterio_bifurcacao(tab, -jogador)
 
 def criterio_centro(tab, jogador): # aux
 	if not eh_tabuleiro(tab):
@@ -293,8 +294,13 @@ def criterio_canto_oposto(tab, jogador): # aux
 		raise ValueError("criterio_canto_oposto: " + \
 			"algum dos argumentos e invalido")
 
-	# TODO
-	return 1
+	cantos = obter_cantos()
+
+	for i in range(len(cantos)):
+		oposto = (i + (len(cantos) // 2)) % len(cantos)
+		if eh_posicao_livre(tab, cantos[i]) \
+			and obter_jogador(tab, cantos[oposto]) == -jogador:
+			return cantos[i]
 
 def criterio_canto_vazio(tab, jogador): # aux
 	if not eh_tabuleiro(tab):
