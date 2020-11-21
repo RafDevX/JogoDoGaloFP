@@ -276,7 +276,6 @@ def obter_posicoes_adjacentes(pos): # aux
 	
 	return adjs
 
-
 def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_bloqueio_bifurcacao: " + \
@@ -296,7 +295,7 @@ def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 						posicoes_para_2_em_linha += (adj,)
 		for pos in posicoes_para_2_em_linha:
 				novo_tab = marcar_posicao(tab, jogador, pos)
-				if len(obter_bifurcacoes(novo_tab, -jogador)) <= lb:
+				if criterio_bloqueio(novo_tab, -jogador) not in bifurcacoes:
 					return pos
 
 def criterio_centro(tab, jogador): # aux
