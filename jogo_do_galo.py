@@ -110,24 +110,14 @@ def eh_posicao_livre(tab, pos):
 
 	return obter_jogador(tab, pos) == 0
 
-def iterar_por_celulas(tab, func): # aux
-	if not (eh_tabuleiro(tab) and callable(func)):
-		raise ValueError("iterar_por_celulas: algum dos argumentos e invalido")
-
-	pos = 0
-	for i in range(len(tab)):
-		for j in range(len(tab[i])):
-			pos = pos + 1
-			func(tab[i][j], pos, (i, j))
-
 def obter_posicoes_livres(tab):
 	if not eh_tabuleiro(tab):
 		raise ValueError("obter_posicoes_livres: o argumento e invalido")
 
 	livres = ()
-	for i in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
-		if eh_posicao_livre(tab, i):
-			livres = livres + (i,)
+	for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
+		if eh_posicao_livre(tab, pos):
+			livres = livres + (pos,)
 	
 	return livres
 
@@ -217,10 +207,10 @@ def criterio_vitoria(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_vitoria: algum dos argumentos e invalido")
 
-	for i in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
-		if eh_posicao_livre(tab, i) \
-			and jogador_ganhador(marcar_posicao(tab, jogador, i)) == jogador:
-			return i
+	for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
+		if eh_posicao_livre(tab, pos) \
+			and jogador_ganhador(marcar_posicao(tab, jogador, pos)) == jogador:
+			return pos
 
 def criterio_bloqueio(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
@@ -228,34 +218,86 @@ def criterio_bloqueio(tab, jogador): # aux
 
 	return criterio_vitoria(tab, -jogador)
 
-def criterio_bifurcacao(tab, jogador): # aux
+def obter_bifurcacoes(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
-		raise ValueError("criterio_bifurcacao: algum dos argumentos e invalido")
+		raise ValueError("obter_bifurcacoes: algum dos argumentos e invalido")
 
 	cantos = obter_cantos()
+	bifurcacoes = ()
 	for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
 		if eh_posicao_livre(tab, pos):
 			coords = obter_coordenadas(pos)
 			linha = obter_linha(tab, coords[0] + 1)
 			col = obter_coluna(tab, coords[1] + 1)
 			diag = ()
-			for i in range(len(cantos)):
+			lc = len(cantos)
+			for i in range(lc):
 				if cantos[i] == pos:
-					diag = obter_diagonal(tab, 1 if i % 2 != 0 else 2)
+					diag = obter_diagonal(tab, 2 if 1 < i + 1 < lc else 1)
 			vfs = ( # verificacoes, 2+ tem que ser True para haver bifurcacao
 				linha.count(0) == 2 and linha.count(-jogador) == 0,
 				col.count(0) == 2 and col.count(-jogador) == 0,
 				diag.count(0) == 2 and diag.count(-jogador) == 0,
 			)
 			if (vfs[0] and (vfs[1] or vfs[2])) or (vfs[1] and vfs[2]):
-				return pos
+				bifurcacoes = bifurcacoes + (pos,)
+	
+	return bifurcacoes
+
+def criterio_bifurcacao(tab, jogador): # aux
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
+		raise ValueError("criterio_bifurcacao: algum dos argumentos e invalido")
+
+	bifurcacoes = obter_bifurcacoes(tab, jogador)
+	if len(bifurcacoes) > 0:
+		return bifurcacoes[0]
+
+def obter_posicao_de_coordenadas(coords): # aux
+	if not (isinstance(coords, tuple) and len(coords) == 2 \
+		and 0 <= coords[0] <= DIMENSAO_TABULEIRO - 1 \
+		and 0 <= coords[1] <= DIMENSAO_TABULEIRO - 1):
+		raise ValueError("obter_posicao_de_coordenadas: o argumento e invalido")
+	
+	return coords[0] * DIMENSAO_TABULEIRO + coords[1] + 1
+
+def obter_posicoes_adjacentes(pos): # aux
+	if not eh_posicao(pos):
+		raise ValueError("obter_posicoes_adjacentes: o argumento e invalido")
+
+	adjs = ()
+	coords = obter_coordenadas(pos)
+	for i in range(coords[0] - 1, coords[0] + 2):
+		if 0 <= i <= (DIMENSAO_TABULEIRO - 1):
+			for j in range(coords[1] - 1, coords[1] + 2):
+				if 0 <= j <= (DIMENSAO_TABULEIRO - 1) and (i, j) != coords:
+					p = obter_posicao_de_coordenadas((i, j))
+					if p not in adjs:
+						adjs = adjs + (p,)
+	
+	return adjs
+
 
 def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_bloqueio_bifurcacao: " + \
 			"algum dos argumentos e invalido")
 
-	return criterio_bifurcacao(tab, -jogador)
+	bifurcacoes = obter_bifurcacoes(tab, -jogador)
+	lb = len(bifurcacoes)
+	if lb == 1:
+		return bifurcacoes[0]
+	elif lb > 1:
+		posicoes_para_2_em_linha = ()
+		for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
+			if obter_jogador(tab, pos) == jogador:
+				for adj in obter_posicoes_adjacentes(pos):
+					if eh_posicao_livre(tab, adj) \
+						and adj not in posicoes_para_2_em_linha:
+						posicoes_para_2_em_linha += (adj,)
+		for pos in posicoes_para_2_em_linha:
+				novo_tab = marcar_posicao(tab, jogador, pos)
+				if len(obter_bifurcacoes(novo_tab, -jogador)) <= lb:
+					return pos
 
 def criterio_centro(tab, jogador): # aux
 	if not eh_tabuleiro(tab):
@@ -328,3 +370,47 @@ def escolher_posicao_auto(tab, jogador, estrategia):
 				return pos
 	
 	raise RuntimeError("escolher_posicao_auto: nenhum criterio foi aplicado")
+
+def eh_simbolo(simbolo):
+	return isinstance(simbolo, str) and simbolo in ('X', 'O')
+
+def converter_simbolo_em_jogador(simbolo):
+	if not eh_simbolo(simbolo):
+		raise ValueError("converter_simbolo_em_jogador: o argumento e invalido")
+
+	return ({'X': 1, 'O': -1})[simbolo]
+
+def jogo_do_galo(simbolo_humano, estrategia):
+	if not (eh_simbolo(simbolo_humano) and eh_estrategia(estrategia)):
+		raise ValueError("jogo_do_galo: algum dos argumentos e invalido")
+
+	jogador_humano = converter_simbolo_em_jogador(simbolo_humano)
+
+	print("Bem-vindo ao JOGO DO GALO.")
+	print("O jogador joga com '" + simbolo_humano + "'.")
+
+	jogador_atual = 1
+	tabuleiro = ((0,) * DIMENSAO_TABULEIRO,) * DIMENSAO_TABULEIRO
+
+	while True:
+		escolha = None
+		if jogador_atual == jogador_humano:
+			escolha = escolher_posicao_manual(tabuleiro)
+		else:
+			print('Turno do computador (' + estrategia + '):')
+			escolha = escolher_posicao_auto(
+				tabuleiro,
+				jogador_atual,
+				estrategia
+			)
+
+		tabuleiro = marcar_posicao(tabuleiro, jogador_atual, escolha)
+		print(tabuleiro_str(tabuleiro))
+
+		ganhador = jogador_ganhador(tabuleiro)
+		if ganhador:
+			return simbolo_str(ganhador)
+		elif len(obter_posicoes_livres(tabuleiro)) == 0:
+			return 'EMPATE'
+		
+		jogador_atual = -jogador_atual
