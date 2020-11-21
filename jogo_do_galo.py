@@ -1,7 +1,11 @@
 # 99311 Rafael Serra e Oliveira
 
+# Projeto Fundamentos da Programacao 2020/2021
+# Licenciatura em Engenharia Informatica e de Computadores (Alameda)
+# Instituto Superior Tecnico
+
 # CONVENCAO DE VOCABULARIO
-# vetor: linha ou coluna
+# vetor: linha, coluna ou diagonal
 # posicao: 1 ... 9 (para dimensao = 3)
 # jogador: -1, 0, 1
 # simbolo: O, _, X (espaco para vazio)
@@ -71,6 +75,15 @@ def obter_diagonal(tab, num_diagonal):
 	
 	return diag
 
+def eh_simbolo(simbolo):
+	return type(simbolo) == str and simbolo in ('X', 'O')
+
+def converter_simbolo_em_jogador(simbolo):
+	if not eh_simbolo(simbolo):
+		raise ValueError("converter_simbolo_em_jogador: o argumento e invalido")
+
+	return ({'X': 1, 'O': -1})[simbolo]
+
 def converter_jogador_em_simbolo(jogador): # aux
 	if jogador == 1:
 		return 'X'
@@ -102,6 +115,30 @@ def obter_coordenadas(pos): # aux
 	linha, col = divmod(pos - 1, DIMENSAO_TABULEIRO)
 
 	return (linha, col)
+
+def obter_posicao(coords): # aux
+	if not (type(coords) == tuple and len(coords) == 2 \
+		and 0 <= coords[0] <= DIMENSAO_TABULEIRO - 1 \
+		and 0 <= coords[1] <= DIMENSAO_TABULEIRO - 1):
+		raise ValueError("obter_posicao: o argumento e invalido")
+	
+	return coords[0] * DIMENSAO_TABULEIRO + coords[1] + 1
+
+def obter_posicoes_adjacentes(pos): # aux
+	if not eh_posicao(pos):
+		raise ValueError("obter_posicoes_adjacentes: o argumento e invalido")
+
+	adjs = ()
+	coords = obter_coordenadas(pos)
+	for i in range(coords[0] - 1, coords[0] + 2):
+		if 0 <= i <= (DIMENSAO_TABULEIRO - 1):
+			for j in range(coords[1] - 1, coords[1] + 2):
+				if 0 <= j <= (DIMENSAO_TABULEIRO - 1) and (i, j) != coords:
+					p = obter_posicao((i, j))
+					if p not in adjs:
+						adjs = adjs + (p,)
+	
+	return adjs
 
 def obter_jogador(tab, pos): # aux
 	if not (eh_tabuleiro(tab) and eh_posicao(pos)):
@@ -210,21 +247,6 @@ def obter_cantos(): # aux
 		DIMENSAO_TABULEIRO ** 2,
 	)
 
-def criterio_vitoria(tab, jogador): # aux
-	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
-		raise ValueError("criterio_vitoria: algum dos argumentos e invalido")
-
-	for pos in obter_posicoes():
-		if eh_posicao_livre(tab, pos) \
-			and jogador_ganhador(marcar_posicao(tab, jogador, pos)) == jogador:
-			return pos
-
-def criterio_bloqueio(tab, jogador): # aux
-	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
-		raise ValueError("criterio_bloqueio: algum dos argumentos e invalido")
-
-	return criterio_vitoria(tab, -jogador)
-
 def obter_bifurcacoes(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("obter_bifurcacoes: algum dos argumentos e invalido")
@@ -251,6 +273,21 @@ def obter_bifurcacoes(tab, jogador): # aux
 	
 	return bifurcacoes
 
+def criterio_vitoria(tab, jogador): # aux
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
+		raise ValueError("criterio_vitoria: algum dos argumentos e invalido")
+
+	for pos in obter_posicoes():
+		if eh_posicao_livre(tab, pos) \
+			and jogador_ganhador(marcar_posicao(tab, jogador, pos)) == jogador:
+			return pos
+
+def criterio_bloqueio(tab, jogador): # aux
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
+		raise ValueError("criterio_bloqueio: algum dos argumentos e invalido")
+
+	return criterio_vitoria(tab, -jogador)
+
 def criterio_bifurcacao(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_bifurcacao: algum dos argumentos e invalido")
@@ -258,30 +295,6 @@ def criterio_bifurcacao(tab, jogador): # aux
 	bifurcacoes = obter_bifurcacoes(tab, jogador)
 	if len(bifurcacoes) > 0:
 		return bifurcacoes[0]
-
-def obter_posicao(coords): # aux
-	if not (type(coords) == tuple and len(coords) == 2 \
-		and 0 <= coords[0] <= DIMENSAO_TABULEIRO - 1 \
-		and 0 <= coords[1] <= DIMENSAO_TABULEIRO - 1):
-		raise ValueError("obter_posicao_de_coordenadas: o argumento e invalido")
-	
-	return coords[0] * DIMENSAO_TABULEIRO + coords[1] + 1
-
-def obter_posicoes_adjacentes(pos): # aux
-	if not eh_posicao(pos):
-		raise ValueError("obter_posicoes_adjacentes: o argumento e invalido")
-
-	adjs = ()
-	coords = obter_coordenadas(pos)
-	for i in range(coords[0] - 1, coords[0] + 2):
-		if 0 <= i <= (DIMENSAO_TABULEIRO - 1):
-			for j in range(coords[1] - 1, coords[1] + 2):
-				if 0 <= j <= (DIMENSAO_TABULEIRO - 1) and (i, j) != coords:
-					p = obter_posicao((i, j))
-					if p not in adjs:
-						adjs = adjs + (p,)
-	
-	return adjs
 
 def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
@@ -376,15 +389,6 @@ def escolher_posicao_auto(tab, jogador, estrategia):
 				return pos
 	
 	raise RuntimeError("escolher_posicao_auto: nenhum criterio foi aplicado")
-
-def eh_simbolo(simbolo):
-	return type(simbolo) == str and simbolo in ('X', 'O')
-
-def converter_simbolo_em_jogador(simbolo):
-	if not eh_simbolo(simbolo):
-		raise ValueError("converter_simbolo_em_jogador: o argumento e invalido")
-
-	return ({'X': 1, 'O': -1})[simbolo]
 
 def jogo_do_galo(simbolo_humano, estrategia):
 	if not (eh_simbolo(simbolo_humano) and eh_estrategia(estrategia)):
