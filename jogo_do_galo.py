@@ -216,7 +216,7 @@ def obter_cantos(): # aux
 def criterio_vitoria(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_vitoria: algum dos argumentos e invalido")
-	
+
 	for i in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
 		if eh_posicao_livre(tab, i) \
 			and jogador_ganhador(marcar_posicao(tab, jogador, i)) == jogador:
@@ -233,14 +233,22 @@ def criterio_bifurcacao(tab, jogador): # aux
 		raise ValueError("criterio_bifurcacao: algum dos argumentos e invalido")
 
 	cantos = obter_cantos()
-	for canto in cantos:
-		if eh_posicao_livre(tab, canto):
-			coords = obter_coordenadas(canto)
+	for pos in range(1, DIMENSAO_TABULEIRO ** 2 + 1):
+		if eh_posicao_livre(tab, pos):
+			coords = obter_coordenadas(pos)
 			linha = obter_linha(tab, coords[0] + 1)
 			col = obter_coluna(tab, coords[1] + 1)
-			if linha.count(0) == 2 and col.count(0) == 2 \
-				and linha.count(-jogador) == 0 and col.count(-jogador) == 0:
-				return canto
+			diag = ()
+			for i in range(len(cantos)):
+				if cantos[i] == pos:
+					diag = obter_diagonal(tab, 1 if i % 2 != 0 else 2)
+			vfs = ( # verificacoes, 2+ tem que ser True para haver bifurcacao
+				linha.count(0) == 2 and linha.count(-jogador) == 0,
+				col.count(0) == 2 and col.count(-jogador) == 0,
+				diag.count(0) == 2 and diag.count(-jogador) == 0,
+			)
+			if (vfs[0] and (vfs[1] or vfs[2])) or (vfs[1] and vfs[2]):
+				return pos
 
 def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
@@ -265,7 +273,7 @@ def criterio_canto_oposto(tab, jogador): # aux
 	cantos = obter_cantos()
 
 	for i in range(len(cantos)):
-		oposto = (i + (len(cantos) // 2)) % len(cantos)
+		oposto = len(cantos) - 1 - i
 		if eh_posicao_livre(tab, cantos[i]) \
 			and obter_jogador(tab, cantos[oposto]) == -jogador:
 			return cantos[i]
