@@ -6,8 +6,7 @@ Licenciatura em Engenharia Informatica e de Computadores (Alameda)
 Instituto Superior Tecnico
 
 CONVENCAO DE VOCABULARIO:
-	vetor: linha, coluna ou diagonal
-		(nao confundir com o tipo "tuplo")
+	componente: linha, coluna ou diagonal
 	posicao: 1 ... 9 (para dimensao = 3)
 	jogador: -1, 0, 1
 		(representacao interna)
@@ -19,20 +18,20 @@ CONVENCAO DE VOCABULARIO:
 DIMENSAO_TABULEIRO = 3 # Quantas celulas ha em cada linha/coluna/diagonal
 
 
-# ##### FUNCOES DE INSPECAO E MANIPULACO DO TABULEIRO E SEUS COMPONENTES ##### #
+# ####### FUNCOES DE INSPECAO E MANIPULACAO DO TABULEIRO E SUAS PARTES ####### #
 
 
-def eh_vetor(vet):
+def eh_componente(comp):
 	# universal -> booleano
-	"""Determina se o seu argumento e um vetor.
+	"""Determina se o seu argumento e um componente.
 
 	Recebe um argumento qualquer e devolve True se esse argumento for um
-	vetor (linha/coluna/diagonal). Caso contrario, devolve False.
+	componente (linha/coluna/diagonal). Caso contrario, devolve False.
 	Nunca gera erros.
 	"""
-	if type(vet) == tuple:
-		if len(vet) == DIMENSAO_TABULEIRO:
-			for el in vet:
+	if type(comp) == tuple:
+		if len(comp) == DIMENSAO_TABULEIRO:
+			for el in comp:
 				if type(el) != int:
 					return False
 				elif abs(el) > 1:
@@ -54,7 +53,7 @@ def eh_tabuleiro(tab):
 	if type(tab) == tuple:
 		if len(tab) == DIMENSAO_TABULEIRO:
 			for el in tab:
-				if not eh_vetor(el):
+				if not eh_componente(el):
 					return False
 			
 			return True
@@ -78,14 +77,14 @@ def eh_posicao(pos):
 	return type(pos) == int and pos in obter_posicoes()
 
 
-def eh_numero_de_vetor(num, eh_diag = False):
+def eh_numero_de_componente(num, eh_diag = False):
 	# universal x booleano -> booleano
-	"""Determina se o seu primeiro argumento e um numero de vetor.
+	"""Determina se o seu primeiro argumento e um numero de componente.
 
 	Recebe um argumento qualquer e devolve True se esse argumento for
-	um numero representante de um vetor. Caso contrario, devolve False.
+	um numero representante de um componente. Caso contrario, devolve False.
 	O segundo argumento (booleano), por defeito False, indica se o tipo
-	de vetores a que se pode associar o numero e uma diagonal, em vez
+	de componentes a que se pode associar o numero e uma diagonal, em vez
 	de uma linha/coluna.
 	Nunca gera erros.
 	"""
@@ -101,7 +100,7 @@ def obter_coluna(tab, num_col):
 	Devolve um tuplo com os valores do tabuleiro nessa coluna.
 	Gera um ValueError se algum dos argumentos for invalido.
 	"""
-	if not (eh_tabuleiro(tab) and eh_numero_de_vetor(num_col)):
+	if not (eh_tabuleiro(tab) and eh_numero_de_componente(num_col)):
 		raise ValueError("obter_coluna: algum dos argumentos e invalido")
 
 	col = ()
@@ -119,7 +118,7 @@ def obter_linha(tab, num_linha):
 	Devolve um tuplo com os valores do tabuleiro nessa linha.
 	Gera um ValueError se algum dos argumentos for invalido.
 	"""
-	if not (eh_tabuleiro(tab) and eh_numero_de_vetor(num_linha)):
+	if not (eh_tabuleiro(tab) and eh_numero_de_componente(num_linha)):
 		raise ValueError("obter_linha: algum dos argumentos e invalido")
 
 	return tab[num_linha - 1]
@@ -136,7 +135,7 @@ def obter_diagonal(tab, num_diagonal):
 	Devolve um tuplo com os valores do tabuleiro nessa diagonal.
 	Gera um ValueError se algum dos argumentos for invalido.
 	"""
-	if not (eh_tabuleiro(tab) and eh_numero_de_vetor(num_diagonal, True)):
+	if not (eh_tabuleiro(tab) and eh_numero_de_componente(num_diagonal, True)):
 		raise ValueError("obter_diagonal: algum dos argumentos e invalido")
 
 	diag = ()
@@ -318,21 +317,21 @@ def obter_posicoes_livres(tab):
 	return livres
 
 
-def vetor_ganhador(vetor):
-	# vetor -> jogador
-	"""Indica o jogador ganhador num vetor.
+def componente_ganhador(componente):
+	# componente -> jogador
+	"""Indica o jogador ganhador num componente.
 
-	Recebe um vetor e devolve o jogador que ganhou nesse vetor,
-	considerando "ganhar um vetor" como preencher todo o vetor.
-	Se nenhum jogador tiver ganho o vetor, devolve o "jogador vazio".
+	Recebe um componente e devolve o jogador que ganhou nesse componente,
+	considerando "ganhar um componente" como preencher todo o componente.
+	Se nenhum jogador tiver ganho o componente, devolve o "jogador vazio".
 	Gera um ValueError se o argumento for invalido.
 	"""
-	if not eh_vetor(vetor):
-		raise ValueError("vetor_ganhador: o argumento e invalido")
+	if not eh_componente(componente):
+		raise ValueError("componente_ganhador: o argumento e invalido")
 
-	jogador = vetor[0]
+	jogador = componente[0]
 
-	if (jogador != 0) and (vetor == (jogador,) * len(vetor)):
+	if (jogador != 0) and (componente == (jogador,) * len(componente)):
 		return jogador
 	else:
 		return 0
@@ -351,15 +350,15 @@ def jogador_ganhador(tab):
 		raise ValueError("jogador_ganhador: o argumento e invalido")
 
 	for i in range(1, DIMENSAO_TABULEIRO + 1):
-		ganhador_linha = vetor_ganhador(obter_linha(tab, i))
+		ganhador_linha = componente_ganhador(obter_linha(tab, i))
 		if ganhador_linha != 0:
 			return ganhador_linha
-		ganhador_coluna = vetor_ganhador(obter_coluna(tab, i))
+		ganhador_coluna = componente_ganhador(obter_coluna(tab, i))
 		if ganhador_coluna != 0:
 			return ganhador_coluna
 
 	for i in range(1, 3):
-		ganhador_diagonal = vetor_ganhador(obter_diagonal(tab, i))
+		ganhador_diagonal = componente_ganhador(obter_diagonal(tab, i))
 		if ganhador_diagonal != 0:
 			return ganhador_diagonal
 
@@ -453,7 +452,7 @@ def obter_bifurcacoes(tab, jogador):
 	Devolve um tuplo com as posicoes de todas as celulas onde ha
 	uma bifurcacao para esse jogador (a celula de intersecao da
 	bifurcacao).
-	Considera uma bifurcacao onde houverem dois vetores que se
+	Considera uma bifurcacao onde houverem dois componentes que se
 	intersetam, faltando aos dois apenas uma celula para ficarem
 	preenchidos (para alem da posicao de intersecao) pelo jogador.
 	Gera um ValueError se algum dos argumentos for invalido.
@@ -532,7 +531,7 @@ def criterio_vitoria(tab, jogador):
 	"""Tenta aplicar o criterio 1 da especificacao.
 
 	Devolve a primeira posicao onde o jogador pode jogar para
-	completar um vetor e portanto ganhar o jogo.
+	completar um componente e portanto ganhar o jogo.
 	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
 	Gera um ValueError se algum dos argumentos for invalidos.
 	"""
@@ -550,7 +549,7 @@ def criterio_bloqueio(tab, jogador):
 	"""Tenta aplicar o criterio 2 da especificacao.
 
 	Devolve a primeira posicao onde o jogador pode jogar para
-	bloquear o outro jogador de completar um vetor e portanto
+	bloquear o outro jogador de completar um componente e portanto
 	ganhar o jogo.
 	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
 	Gera um ValueError se algum dos argumentos for invalidos.
@@ -566,7 +565,7 @@ def criterio_bifurcacao(tab, jogador):
 	"""Tenta aplicar o criterio 3 da especificacao.
 
 	Devolve a primeira posicao onde o jogador tem uma bifurcacao,
-	ou seja, onde houverem dois vetores que se intersetam, faltando
+	ou seja, onde houverem dois componentes que se intersetam, faltando
 	aos dois apenas uma celula para ficarem preenchidos (para alem
 	da posicao de intersecao) pelo jogador.
 	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
