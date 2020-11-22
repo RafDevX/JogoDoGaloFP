@@ -1,22 +1,38 @@
 # 99311 Rafael Serra e Oliveira
 
-# Projeto Fundamentos da Programacao 2020/2021
-# Licenciatura em Engenharia Informatica e de Computadores (Alameda)
-# Instituto Superior Tecnico
+"""JOGO DO GALO
+Projeto Fundamentos da Programacao 2020/2021
+Licenciatura em Engenharia Informatica e de Computadores (Alameda)
+Instituto Superior Tecnico
 
-# CONVENCAO DE VOCABULARIO
-# vetor: linha, coluna ou diagonal
-# posicao: 1 ... 9 (para dimensao = 3)
-# jogador: -1, 0, 1
-# simbolo: O, _, X (espaco para vazio)
+CONVENCAO DE VOCABULARIO:
+	vetor: linha, coluna ou diagonal
+		(nao confundir com o tipo "tuplo")
+	posicao: 1 ... 9 (para dimensao = 3)
+	jogador: -1, 0, 1
+		(representacao interna)
+	simbolo: O, _, X (espaco para vazio)
+		(representacao externa)
+	celula: espaco geometrico associado a uma posicao
+"""
 
 DIMENSAO_TABULEIRO = 3 # Quantas celulas ha em cada linha/coluna/diagonal
 
 
-def eh_vetor(tab): # aux
-	if type(tab) == tuple:
-		if len(tab) == DIMENSAO_TABULEIRO:
-			for el in tab:
+# ##### FUNCOES DE INSPECAO E MANIPULACO DO TABULEIRO E SEUS COMPONENTES ##### #
+
+
+def eh_vetor(vet):
+	# universal -> booleano
+	"""Determina se o seu argumento e um vetor.
+
+	Recebe um argumento qualquer e devolve True se esse argumento for um
+	vetor (linha/coluna/diagonal). Caso contrario, devolve False.
+	Nunca gera erros.
+	"""
+	if type(vet) == tuple:
+		if len(vet) == DIMENSAO_TABULEIRO:
+			for el in vet:
 				if type(el) != int:
 					return False
 				elif abs(el) > 1:
@@ -28,6 +44,13 @@ def eh_vetor(tab): # aux
 
 
 def eh_tabuleiro(tab):
+	# universal -> booleano
+	"""Determina se o seu argumento e um tabuleiro.
+
+	Recebe um argumento qualquer e devolve True se esse argumento for um
+	tabuleiro de jogo do galo. Caso contrario, devolve False.
+	Nunca gera erros.
+	"""
 	if type(tab) == tuple:
 		if len(tab) == DIMENSAO_TABULEIRO:
 			for el in tab:
@@ -38,19 +61,46 @@ def eh_tabuleiro(tab):
 	return False
 
 
-def obter_posicoes(): # aux
+def obter_posicoes():
+	# nenhum -> gama
+	"""Devolve uma gama de todas as posicoes no tabuleiro."""
 	return range(1, DIMENSAO_TABULEIRO ** 2 + 1)
 
 
 def eh_posicao(pos):
+	# universal -> booleano
+	"""Determina se o seu argumento e uma posicao.
+
+	Recebe um argumento qualquer e devolve True se esse argumento for
+	uma posicao no tabuleiro. Caso contrario, devolve False.
+	Nunca gera erros.
+	"""
 	return type(pos) == int and pos in obter_posicoes()
 
 
-def eh_numero_de_vetor(num): # aux
-	return type(num) == int and 1 <= num <= DIMENSAO_TABULEIRO
+def eh_numero_de_vetor(num, eh_diag = False):
+	# universal x booleano -> booleano
+	"""Determina se o seu primeiro argumento e um numero de vetor.
+
+	Recebe um argumento qualquer e devolve True se esse argumento for
+	um numero representante de um vetor. Caso contrario, devolve False.
+	O segundo argumento (booleano), por defeito False, indica se o tipo
+	de vetores a que se pode associar o numero e uma diagonal, em vez
+	de uma linha/coluna.
+	Nunca gera erros.
+	"""
+	lim = 2 if eh_diag else DIMENSAO_TABULEIRO
+	return type(num) == int and 1 <= num <= lim
 
 
 def obter_coluna(tab, num_col):
+	# tabuleiro x inteiro -> tuplo
+	"""Encontra uma coluna num tabuleiro.
+
+	Recebe um tabuleiro e o numero representante de uma coluna.
+	Devolve um tuplo com os valores do tabuleiro nessa coluna.
+	Gera um ValueError se algum dos argumentos for invalido.
+	"""
 	if not (eh_tabuleiro(tab) and eh_numero_de_vetor(num_col)):
 		raise ValueError("obter_coluna: algum dos argumentos e invalido")
 
@@ -62,6 +112,13 @@ def obter_coluna(tab, num_col):
 
 
 def obter_linha(tab, num_linha):
+	# tabuleiro x inteiro -> tuplo
+	"""Encontra uma linha num tabuleiro.
+
+	Recebe um tabuleiro e o numero representante de uma linha.
+	Devolve um tuplo com os valores do tabuleiro nessa linha.
+	Gera um ValueError se algum dos argumentos for invalido.
+	"""
 	if not (eh_tabuleiro(tab) and eh_numero_de_vetor(num_linha)):
 		raise ValueError("obter_linha: algum dos argumentos e invalido")
 
@@ -69,8 +126,17 @@ def obter_linha(tab, num_linha):
 
 
 def obter_diagonal(tab, num_diagonal):
-	if not (eh_tabuleiro(tab) and type(num_diagonal) == int
-		and 1 <= num_diagonal <= 2):
+	# tabuleiro x inteiro -> tuplo
+	"""Encontra uma diagonal num tabuleiro.
+
+	Recebe um tabuleiro e o numero representante de uma diagonal.
+	Note-se que esse numero e 1 para a diagonal principal (de cima
+	para baixo, da esquerda para a direita) e 2 para a diagonal
+	secundaria (de baixo para cima, da esquerda para a direita).
+	Devolve um tuplo com os valores do tabuleiro nessa diagonal.
+	Gera um ValueError se algum dos argumentos for invalido.
+	"""
+	if not (eh_tabuleiro(tab) and eh_numero_de_vetor(num_diagonal, True)):
 		raise ValueError("obter_diagonal: algum dos argumentos e invalido")
 
 	diag = ()
@@ -81,27 +147,73 @@ def obter_diagonal(tab, num_diagonal):
 	return diag
 
 
-def eh_simbolo(simbolo):
-	return type(simbolo) == str and simbolo in ("X", "O")
+def eh_simbolo(simbolo, permitir_vazio = False):
+	# universal [x booleano = False] -> booleano
+	"""Determina se o seu primeiro argumento e um simbolo.
+
+	Recebe um argumento qualquer e devolve True se esse argumento for
+	um simbolo. Caso contrario, devolve False.
+	O segundo argumento controla se e considerado o "simbolo vazio", ou
+	seja, um espaco para representar uma celula vazia. Por defeito, tem
+	o valor False.
+	Nunca gera erros.
+	"""
+	simbolos = ("X", "O")
+	if permitir_vazio:
+		simbolos = simbolos + (" ",)
+	return type(simbolo) == str and (simbolo in simbolos)
+
+
+def eh_jogador(jogador, permitir_vazio = False):
+	# universal [x booleano = False] -> booleano
+	"""Determina se o seu primeiro argumento e um jogador.
+
+	Recebe um argumento qualquer e devolve True se esse argumento for
+	um jogador. Caso contrario, devolve False.
+	O segundo argumento controla se e considerado o "jogador vazio", ou
+	seja, o jogador atribuido a celulas vazias. Por defeito, tem
+	o valor False.
+	Nunca gera erros.
+	"""
+	return type(jogador) == int and (permitir_vazio or abs(jogador) == 1)
 
 
 def converter_simbolo_em_jogador(simbolo):
-	if not eh_simbolo(simbolo):
+	# simbolo -> jogador
+	"""Traduz o seu argumento num jogador.
+
+	Recebe um simbolo representante de um jogador (incluindo
+	o "jogador vazio") e devolve o jogador correspondente.
+	Gera um ValueError se o argumento for invalido.
+	"""
+	if not eh_simbolo(simbolo, True):
 		raise ValueError("converter_simbolo_em_jogador: o argumento e invalido")
 
-	return ({"X": 1, "O": -1})[simbolo]
+	return ({"X": 1, " ": 0, "O": -1})[simbolo]
 
 
-def converter_jogador_em_simbolo(jogador): # aux
-	if jogador == 1:
-		return "X"
-	elif jogador == -1:
-		return "O"
-	else:
-		return " "
+def converter_jogador_em_simbolo(jogador):
+	# jogador -> simbolo
+	"""Traduz o seu argumento num simbolo de jogador.
+
+	Recebe um jogador (incluindo o "jogador vazio") e devolve o
+	simbolo representante de jogador correspondente a esse simbolo.
+	Gera um ValueError se o argumento for invalido.
+	"""
+	if not eh_jogador(jogador, True):
+		raise ValueError("converter_jogador_em_simbolo: o argumento e invalido")
+	
+	return ({-1: "O", 0: " ", 1: "X"})[jogador]
 
 
 def tabuleiro_str(tab):
+	# tabuleiro -> cadeia de caracteres
+	"""Gera uma representacao externa de um tabuleiro.
+
+	Recebe um tabuleiro e devolve a sua representacao externa,
+	formatada para facil leitura humana.
+	Gera um ValueError se o seu argumento for invalido.
+	"""
 	if not eh_tabuleiro(tab):
 		raise ValueError("tabuleiro_str: o argumento e invalido")
 
@@ -118,7 +230,17 @@ def tabuleiro_str(tab):
 	return res
 
 
-def obter_coordenadas(pos): # aux
+def obter_coordenadas(pos):
+	# posicao -> coordenadas
+	"""Calcula as coordenadas correspondentes a uma posicao.
+
+	Recebe uma posicao e devolve um tuplo de dimensao 2, sendo o
+	seu primeiro elemento o indice da linha (numero da linha - 1,
+	pois comeca em 0 em vez de 1) e o seu segundo elemento o indice
+	da coluna, ambos referentes a celula do tabuleiro associada
+	a posicao passada como argumento.
+	Gera um ValueError se o seu argumento for invalido.
+	"""
 	if not eh_posicao(pos):
 		raise ValueError("obter_coordenadas: o argumento e invalido")
 	
@@ -127,7 +249,16 @@ def obter_coordenadas(pos): # aux
 	return (linha, col)
 
 
-def obter_posicao(coords): # aux
+def obter_posicao(coords):
+	# coordenadas -> posicao
+	"""Calcula a posicao correspondente ao seu argumento.
+
+	Recebe as coordenadas de uma celula (dadas por um tuplo com
+	dois elementos: respetivamente, o indice da linha e o indice
+	da coluna no tabuleiro, comecando a contar em 0) e devolve
+	a posicao associada a essa celula.
+	Gera um ValueError se o seu argumento for invalido.
+	"""
 	if not (type(coords) == tuple and len(coords) == 2
 		and 0 <= coords[0] <= DIMENSAO_TABULEIRO - 1
 		and 0 <= coords[1] <= DIMENSAO_TABULEIRO - 1):
@@ -136,24 +267,15 @@ def obter_posicao(coords): # aux
 	return coords[0] * DIMENSAO_TABULEIRO + coords[1] + 1
 
 
-def obter_posicoes_adjacentes(pos): # aux
-	if not eh_posicao(pos):
-		raise ValueError("obter_posicoes_adjacentes: o argumento e invalido")
+def obter_jogador(tab, pos):
+	# tabuleiro x posicao -> jogador
+	"""Encontra o jogador numa dada posicao de um tabuleiro.
 
-	adjs = ()
-	coords = obter_coordenadas(pos)
-	for i in range(coords[0] - 1, coords[0] + 2):
-		if 0 <= i <= (DIMENSAO_TABULEIRO - 1):
-			for j in range(coords[1] - 1, coords[1] + 2):
-				if 0 <= j <= (DIMENSAO_TABULEIRO - 1) and (i, j) != coords:
-					p = obter_posicao((i, j))
-					if p not in adjs:
-						adjs = adjs + (p,)
-	
-	return adjs
-
-
-def obter_jogador(tab, pos): # aux
+	Recebe um tabuleiro e uma posicao.
+	Devolve o jogador na celula correspondente a posicao passada
+	como argumento.
+	Gera um ValueError se algum dos argumentos for invalido.
+	"""
 	if not (eh_tabuleiro(tab) and eh_posicao(pos)):
 		raise ValueError("obter_jogador: algum dos argumentos e invalido")
 
@@ -163,6 +285,14 @@ def obter_jogador(tab, pos): # aux
 
 
 def eh_posicao_livre(tab, pos):
+	# tabuleiro x posicao -> booleano
+	"""Determina se uma posicao esta livre.
+
+	Recebe um tabuleiro e um posicao.
+	Devolve se a celula correspondente a posicao passada
+	tem o "jogador vazio".
+	Gera um ValueError se algum dos argumentos for invalido.
+	"""
 	if not (eh_tabuleiro(tab) and eh_posicao(pos)):
 		raise ValueError("eh_posicao_livre: algum dos argumentos e invalido")
 
@@ -170,6 +300,13 @@ def eh_posicao_livre(tab, pos):
 
 
 def obter_posicoes_livres(tab):
+	# tabuleiro -> tuplo
+	"""Encontra todas as posicoes livres num tabuleiro.
+
+	Recebe um tabuleiro e devolve um tuplo com as posicoes de
+	todas as celulas com o "jogador vazio" nesse tabuleiro.
+	Gera um ValueError se o argumento for invalido.
+	"""
 	if not eh_tabuleiro(tab):
 		raise ValueError("obter_posicoes_livres: o argumento e invalido")
 
@@ -181,7 +318,15 @@ def obter_posicoes_livres(tab):
 	return livres
 
 
-def vetor_ganhador(vetor): # aux
+def vetor_ganhador(vetor):
+	# vetor -> jogador
+	"""Indica o jogador ganhador num vetor.
+
+	Recebe um vetor e devolve o jogador que ganhou nesse vetor,
+	considerando "ganhar um vetor" como preencher todo o vetor.
+	Se nenhum jogador tiver ganho o vetor, devolve o "jogador vazio".
+	Gera um ValueError se o argumento for invalido.
+	"""
 	if not eh_vetor(vetor):
 		raise ValueError("vetor_ganhador: o argumento e invalido")
 
@@ -194,6 +339,14 @@ def vetor_ganhador(vetor): # aux
 
 
 def jogador_ganhador(tab):
+	# tabuleiro -> jogador
+	"""Indica o jogador ganhador num tabuleiro.
+
+	Recebe um tabuleiro e devolve o jogador que ganhou a partida
+	representada por esse tabuleiro.
+	Se nenhum jogador tiver ganho, devolve o "jogador vazio".
+	Gera um ValueError se o argumento for invalido.
+	"""
 	if not eh_tabuleiro(tab):
 		raise ValueError("jogador_ganhador: o argumento e invalido")
 
@@ -213,11 +366,17 @@ def jogador_ganhador(tab):
 	return 0
 
 
-def eh_jogador(jogador): # aux
-	return type(jogador) == int and abs(jogador) == 1
-
-
 def marcar_posicao(tab, jogador, pos):
+	# tabuleiro x jogador x posicao -> tabuleiro
+	"""Marca uma jogada numa posicao livre de um tabuleiro.
+
+	Recebe um tabuleiro, um jogador (que nao o "jogador vazio") e
+	uma posicao livre.
+	Devolve um novo tabuleiro identico ao primeiro, exceto que
+	com a celula correspondente a posicao passada alterada para
+	o jogador passado.
+	Gera um ValueError se algum dos argumentos for invalido.
+	"""
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)
 		and eh_posicao(pos) and eh_posicao_livre(tab, pos)):
 		raise ValueError("marcar_posicao: algum dos argumentos e invalido")
@@ -237,37 +396,20 @@ def marcar_posicao(tab, jogador, pos):
 	return novo_tab
 
 
-def escolher_posicao_manual(tab):
-	if not eh_tabuleiro(tab):
-		raise ValueError("escolher_posicao_manual: o argumento e invalido")
-
-	escolha = int(input("Turno do jogador. Escolha uma posicao livre: "))
-
-	if not (eh_posicao(escolha) and eh_posicao_livre(tab, escolha)):
-		raise ValueError("escolher_posicao_manual: "
-			+ "a posicao introduzida e invalida")
-
-	return escolha
-
-
-def eh_estrategia(estrategia): # aux
-	return type(estrategia) == str and estrategia in (
-		"basico",
-		"normal",
-		"perfeito"
-	)
-
-
-# NOTA
+# NOTA:
 # Algumas funcoes podiam ser variaveis globais, mas o prof. Joao Pavao Martins
-# pediu para ter o minimo de variaveis globais possiveis
+# pediu para o projeto usar o minimo de variaveis globais possiveis
 
 
-def obter_centro(): # aux
-	return (DIMENSAO_TABULEIRO ** 2) // 2 + 1 # posicao
+def obter_centro():
+	# nenhum -> posicao
+	"""Calcula a posicao da celula central do tabuleiro."""
+	return (DIMENSAO_TABULEIRO ** 2) // 2 + 1
 
 
-def obter_cantos(): # aux
+def obter_cantos():
+	# nenhum -> tuplo
+	"""Devolve um tuplo das posicoes das celulas nos cantos do tabuleiro."""
 	return ( # por ordem de posicao
 		1,
 		DIMENSAO_TABULEIRO,
@@ -276,7 +418,43 @@ def obter_cantos(): # aux
 	)
 
 
-def obter_bifurcacoes(tab, jogador): # aux
+def obter_posicoes_adjacentes(pos):
+	# posicao -> tuplo
+	"""Encontra as posicoes adjacentes ao seu argumento.
+
+	Recebe uma posicao e devolve um tuplo das posicoes associadas
+	a todas as celulas adjacentes (que pertencam ao tabuleiro) a
+	celula correspondente a posicao	passada como argumento.
+	Considera que uma celula e adjacente a outra se tem um vertice
+	ou uma aresta em comum com esta, nunca incluindo a propria celula.
+	Gera uma ValueError se o seu argumento for invalido.
+	"""
+	if not eh_posicao(pos):
+		raise ValueError("obter_posicoes_adjacentes: o argumento e invalido")
+
+	adjs = ()
+	coords = obter_coordenadas(pos)
+	for i in range(coords[0] - 1, coords[0] + 2):
+		if 0 <= i <= (DIMENSAO_TABULEIRO - 1):
+			for j in range(coords[1] - 1, coords[1] + 2):
+				if 0 <= j <= (DIMENSAO_TABULEIRO - 1) and (i, j) != coords:
+					p = obter_posicao((i, j))
+					if p not in adjs:
+						adjs = adjs + (p,)
+	
+	return adjs
+
+
+def obter_bifurcacoes(tab, jogador):
+	# tabuleiro x jogador -> tuplo
+	"""Encontra todas as bifurcacoes de um jogador num tabuleiro.
+
+	Recebe um tabuleiro e um jogador.
+	Devolve um tuplo com as posicoes de todas as celulas onde ha
+	uma bifurcacao para esse jogador (a celula de intersecao da
+	bifurcacao).
+	Gera um ValueError se algum dos argumentos for invalido.
+	"""
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("obter_bifurcacoes: algum dos argumentos e invalido")
 
@@ -301,6 +479,31 @@ def obter_bifurcacoes(tab, jogador): # aux
 				bifurcacoes = bifurcacoes + (pos,)
 	
 	return bifurcacoes
+
+
+# ############################## FUNCOES DE JOGO ############################# #
+
+
+def escolher_posicao_manual(tab):
+	if not eh_tabuleiro(tab):
+		raise ValueError("escolher_posicao_manual: o argumento e invalido")
+
+	escolha = int(input("Turno do jogador. Escolha uma posicao livre: "))
+
+	if not (eh_posicao(escolha) and eh_posicao_livre(tab, escolha)):
+		raise ValueError(
+			"escolher_posicao_manual: a posicao introduzida e invalida"
+		)
+
+	return escolha
+
+
+def eh_estrategia(estrategia): # aux
+	return type(estrategia) == str and estrategia in (
+		"basico",
+		"normal",
+		"perfeito"
+	)
 
 
 def criterio_vitoria(tab, jogador): # aux
@@ -331,8 +534,9 @@ def criterio_bifurcacao(tab, jogador): # aux
 
 def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
-		raise ValueError("criterio_bloqueio_bifurcacao: "
-			+ "algum dos argumentos e invalido")
+		raise ValueError(
+			"criterio_bloqueio_bifurcacao: algum dos argumentos e invalido"
+		)
 
 	bifurcacoes = obter_bifurcacoes(tab, -jogador)
 	lb = len(bifurcacoes)
@@ -363,8 +567,9 @@ def criterio_centro(tab, jogador): # aux
 
 def criterio_canto_oposto(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
-		raise ValueError("criterio_canto_oposto: "
-			+ "algum dos argumentos e invalido")
+		raise ValueError(
+			"criterio_canto_oposto: algum dos argumentos e invalido"
+		)
 
 	cantos = obter_cantos()
 
@@ -401,8 +606,9 @@ def criterio_lateral_vazio(tab, jogador): # aux
 def escolher_posicao_auto(tab, jogador, estrategia):
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)
 		and eh_estrategia(estrategia)):
-		raise ValueError("escolher_posicao_auto: "
-			+ "algum dos argumentos e invalido")
+		raise ValueError(
+			"escolher_posicao_auto: algum dos argumentos e invalido"
+		)
 	
 	crits_perfeitos = estrategia == "perfeito"
 	crits_normais = crits_perfeitos or estrategia == "normal"
