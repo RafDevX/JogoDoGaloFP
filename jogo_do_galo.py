@@ -12,9 +12,6 @@
 
 DIMENSAO_TABULEIRO = 3 # Quantas celulas ha em cada linha/coluna/diagonal
 
-# Algumas funcoes podiam ser variaveis globais, mas o prof. Joao Martins Pavao
-# pediu para ter o minimo de variaveis globais possiveis
-
 
 def eh_vetor(tab): # aux
 	if type(tab) == tuple:
@@ -259,6 +256,11 @@ def eh_estrategia(estrategia): # aux
 		"normal",
 		"perfeito"
 	)
+
+
+# NOTA
+# Algumas funcoes podiam ser variaveis globais, mas o prof. Joao Pavao Martins
+# pediu para ter o minimo de variaveis globais possiveis
 
 
 def obter_centro(): # aux
