@@ -1,6 +1,7 @@
 # 99311 Rafael Serra e Oliveira
 
 """JOGO DO GALO
+
 Projeto Fundamentos da Programacao 2020/2021
 Licenciatura em Engenharia Informatica e de Computadores (Alameda)
 Instituto Superior Tecnico
@@ -317,7 +318,7 @@ def obter_posicoes_livres(tab):
 	return livres
 
 
-def componente_ganhador(componente):
+def componente_ganhador(comp):
 	# componente -> jogador
 	"""Indica o jogador ganhador num componente.
 
@@ -326,12 +327,12 @@ def componente_ganhador(componente):
 	Se nenhum jogador tiver ganho o componente, devolve o "jogador vazio".
 	Gera um ValueError se o argumento for invalido.
 	"""
-	if not eh_componente(componente):
+	if not eh_componente(comp):
 		raise ValueError("componente_ganhador: o argumento e invalido")
 
-	jogador = componente[0]
+	jogador = comp[0]
 
-	if (jogador != 0) and (componente == (jogador,) * len(componente)):
+	if (jogador != 0) and (comp == (jogador,) * len(comp)):
 		return jogador
 	else:
 		return 0
