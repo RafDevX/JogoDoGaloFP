@@ -453,6 +453,9 @@ def obter_bifurcacoes(tab, jogador):
 	Devolve um tuplo com as posicoes de todas as celulas onde ha
 	uma bifurcacao para esse jogador (a celula de intersecao da
 	bifurcacao).
+	Considera uma bifurcacao onde houverem dois vetores que se
+	intersetam, faltando aos dois apenas uma celula para ficarem
+	preenchidos (para alem da posicao de intersecao) pelo jogador.
 	Gera um ValueError se algum dos argumentos for invalido.
 	"""
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
@@ -485,6 +488,14 @@ def obter_bifurcacoes(tab, jogador):
 
 
 def escolher_posicao_manual(tab):
+	# tabuleiro -> posicao
+	"""Pede ao utilizador uma posicao livre.
+
+	Recebe um tabuleiro e pede para o utilizador introduzir uma posicao.
+	Devolve a posicao livre escolhida pelo utilizador.
+	Gera um ValueError se o argumento for invalido ou se o inteiro
+	introduzido nao for uma posicao livre no tabuleiro.
+	"""
 	if not eh_tabuleiro(tab):
 		raise ValueError("escolher_posicao_manual: o argumento e invalido")
 
@@ -498,7 +509,14 @@ def escolher_posicao_manual(tab):
 	return escolha
 
 
-def eh_estrategia(estrategia): # aux
+def eh_estrategia(estrategia):
+	# universal -> booleano
+	"""Determina se o seu argumento e uma estrategia.
+
+	Recebe um argumento qualquer e devolve True se esse argumento for uma
+	estrategia de jogo automatico. Caso contrario, devolve False.
+	Nunca gera erros.
+	"""
 	return type(estrategia) == str and estrategia in (
 		"basico",
 		"normal",
@@ -506,7 +524,18 @@ def eh_estrategia(estrategia): # aux
 	)
 
 
-def criterio_vitoria(tab, jogador): # aux
+# FUNCOES AUXILIARES PARA AVALIACAO DE CRITERIOS:
+# Assinatura comum: tabuleiro x jogador -> posicao/nenhum
+
+def criterio_vitoria(tab, jogador):
+	# tabuleiro x jogador -> posicao/nenhum
+	"""Tenta aplicar o criterio 1 da especificacao.
+
+	Devolve a primeira posicao onde o jogador pode jogar para
+	completar um vetor e portanto ganhar o jogo.
+	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
+	Gera um ValueError se algum dos argumentos for invalidos.
+	"""
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_vitoria: algum dos argumentos e invalido")
 
@@ -516,14 +545,33 @@ def criterio_vitoria(tab, jogador): # aux
 			return pos
 
 
-def criterio_bloqueio(tab, jogador): # aux
+def criterio_bloqueio(tab, jogador):
+	# tabuleiro x jogador -> posicao/nenhum
+	"""Tenta aplicar o criterio 2 da especificacao.
+
+	Devolve a primeira posicao onde o jogador pode jogar para
+	bloquear o outro jogador de completar um vetor e portanto
+	ganhar o jogo.
+	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
+	Gera um ValueError se algum dos argumentos for invalidos.
+	"""
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_bloqueio: algum dos argumentos e invalido")
 
 	return criterio_vitoria(tab, -jogador)
 
 
-def criterio_bifurcacao(tab, jogador): # aux
+def criterio_bifurcacao(tab, jogador):
+	# tabuleiro x jogador -> posicao/nenhum
+	"""Tenta aplicar o criterio 3 da especificacao.
+
+	Devolve a primeira posicao onde o jogador tem uma bifurcacao,
+	ou seja, onde houverem dois vetores que se intersetam, faltando
+	aos dois apenas uma celula para ficarem preenchidos (para alem
+	da posicao de intersecao) pelo jogador.
+	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
+	Gera um ValueError se algum dos argumentos for invalidos.
+	"""
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_bifurcacao: algum dos argumentos e invalido")
 
@@ -532,7 +580,20 @@ def criterio_bifurcacao(tab, jogador): # aux
 		return bifurcacoes[0]
 
 
-def criterio_bloqueio_bifurcacao(tab, jogador): # aux
+def criterio_bloqueio_bifurcacao(tab, jogador):
+	# tabuleiro x jogador -> posicao/nenhum
+	"""Tenta aplicar o criterio 4 da especificacao.
+
+	Calcula as bifurcacoes do adversario.
+	Se houver apenas uma, devolve a posicao da intersecao
+	para o jogador a poder bloquear.
+	Se houverem mais que uma, devolve a primeira posicao que
+	forca a adversario a bloquear uma possivel vitoria, sem
+	que a posicao de bloqueio forcado seja uma das de intersecao
+	das bifurcacoes calculadas anteriormente.
+	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
+	Gera um ValueError se algum dos argumentos for invalidos.
+	"""
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError(
 			"criterio_bloqueio_bifurcacao: algum dos argumentos e invalido"
@@ -543,20 +604,27 @@ def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 	if lb == 1:
 		return bifurcacoes[0]
 	elif lb > 1:
-		posicoes_para_2_em_linha = ()
+		posicoes_possiveis = ()
 		for pos in obter_posicoes():
 			if obter_jogador(tab, pos) == jogador:
 				for adj in obter_posicoes_adjacentes(pos):
 					if (eh_posicao_livre(tab, adj)
-						and adj not in posicoes_para_2_em_linha):
-						posicoes_para_2_em_linha += (adj,)
-		for pos in posicoes_para_2_em_linha:
+						and adj not in posicoes_possiveis):
+						posicoes_possiveis += (adj,)
+		for pos in posicoes_possiveis:
 				novo_tab = marcar_posicao(tab, jogador, pos)
 				if criterio_bloqueio(novo_tab, -jogador) not in bifurcacoes:
 					return pos
 
 
-def criterio_centro(tab, jogador): # aux
+def criterio_centro(tab, jogador):
+	# tabuleiro x jogador -> posicao/nenhum
+	"""Tenta aplicar o criterio 5 da especificacao.
+
+	Devolve a posicao central do tabuleiro se esta estiver livre.
+	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
+	Gera um ValueError se algum dos argumentos for invalidos.
+	"""
 	if not eh_tabuleiro(tab):
 		raise ValueError("criterio_centro: o argumento e invalido")
 
@@ -565,7 +633,15 @@ def criterio_centro(tab, jogador): # aux
 		return centro
 
 
-def criterio_canto_oposto(tab, jogador): # aux
+def criterio_canto_oposto(tab, jogador):
+	# tabuleiro x jogador -> posicao/nenhum
+	"""Tenta aplicar o criterio 6 da especificacao.
+
+	Devolve a posicao do primeiro canto (por ordem de posicao)
+	livre tal que o canto oposto esteja ocupado pelo adversario.
+	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
+	Gera um ValueError se algum dos argumentos for invalidos.
+	"""
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError(
 			"criterio_canto_oposto: algum dos argumentos e invalido"
@@ -580,7 +656,14 @@ def criterio_canto_oposto(tab, jogador): # aux
 			return cantos[i]
 
 
-def criterio_canto_vazio(tab, jogador): # aux
+def criterio_canto_vazio(tab, jogador):
+	# tabuleiro x jogador -> posicao/nenhum
+	"""Tenta aplicar o criterio 7 da especificacao.
+
+	Devolve a posicao do primeiro canto (por ordem de posicao) livre.
+	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
+	Gera um ValueError se algum dos argumentos for invalidos.
+	"""
 	if not eh_tabuleiro(tab):
 		raise ValueError("criterio_canto_vazio: o argumento e invalido")
 
@@ -591,7 +674,15 @@ def criterio_canto_vazio(tab, jogador): # aux
 			return pos
 
 
-def criterio_lateral_vazio(tab, jogador): # aux
+def criterio_lateral_vazio(tab, jogador):
+	# tabuleiro x jogador -> posicao/nenhum
+	"""Tenta aplicar o criterio 8 da especificacao.
+
+	Devolve a posicao da primeira celula lateral (nao canto
+	nem centro) que esteja vazia.
+	Se nenhuma posicao respeitar estas condicoes, nao devolve nada.
+	Gera um ValueError se algum dos argumentos for invalidos.
+	"""
 	if not eh_tabuleiro(tab):
 		raise ValueError("criterio_lateral_vazio: o argumento e invalido")
 
@@ -602,8 +693,21 @@ def criterio_lateral_vazio(tab, jogador): # aux
 		if pos != centro and (pos not in cantos) and eh_posicao_livre(tab, pos):
 			return pos
 
+# FIM CRITERIOS
+
 
 def escolher_posicao_auto(tab, jogador, estrategia):
+	# tabuleiro x jogador x estrategia -> posicao
+	"""Escolhe uma posicao de acordo com a estrategia dada.
+
+	Recebe um tabuleiro, um jogador e uma estrategia de jogo
+	automatico e devolve uma posicao escolhida de acordo
+	com o primeiro dos criterios da especificacao que seja
+	aplicavel e que esteja disponivel para a estrategia.
+	Gera um ValueError se algum dos argumentos for invalido.
+	Gera um RuntimeError se nenhum dos criterios poder ser
+	aplicado, o que nunca deve acontecer.
+	"""
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)
 		and eh_estrategia(estrategia)):
 		raise ValueError(
@@ -615,7 +719,7 @@ def escolher_posicao_auto(tab, jogador, estrategia):
 	crits_basicos = crits_normais or estrategia == "basico"
 
 	criterios = (
-		# tentar aplicar (bool), criterio (function)
+		# tentar aplicar? (booleano), criterio (funcao)
 		(crits_normais, criterio_vitoria),
 		(crits_normais, criterio_bloqueio),
 		(crits_perfeitos, criterio_bifurcacao),
@@ -636,6 +740,18 @@ def escolher_posicao_auto(tab, jogador, estrategia):
 
 
 def jogo_do_galo(simbolo_humano, estrategia):
+	# simbolo x estrategia -> cadeia de caracteres
+	"""Executa uma partida do Jogo do Galo.
+
+	Recebe um simbolo (nao "vazio") para representar o jogador
+	humano e uma estrategia a ser usada pelo jogador computador.
+	Inicia uma sessao interativa com o utilizador que se prolonga
+	ate algum dos jogadores ganhar ou nao haverem celulas livres
+	no tabuleiro.
+	No primeiro caso, devolve o simbolo do jogador que ganhou a partida.
+	No segundo caso, devolve a cadeia de caracteres "EMPATE".
+	Gera um ValueError se algum dos argumentos for invalido.
+	"""
 	if not (eh_simbolo(simbolo_humano) and eh_estrategia(estrategia)):
 		raise ValueError("jogo_do_galo: algum dos argumentos e invalido")
 
