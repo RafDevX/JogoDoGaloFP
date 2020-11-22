@@ -15,6 +15,7 @@ DIMENSAO_TABULEIRO = 3 # Quantas celulas ha em cada linha/coluna/diagonal
 # Algumas funcoes podiam ser variaveis globais, mas o prof. Joao Martins Pavao
 # pediu para ter o minimo de variaveis globais possiveis
 
+
 def eh_vetor(tab): # aux
 	if type(tab) == tuple:
 		if len(tab) == DIMENSAO_TABULEIRO:
@@ -28,6 +29,7 @@ def eh_vetor(tab): # aux
 	
 	return False
 
+
 def eh_tabuleiro(tab):
 	if type(tab) == tuple:
 		if len(tab) == DIMENSAO_TABULEIRO:
@@ -38,14 +40,18 @@ def eh_tabuleiro(tab):
 			return True
 	return False
 
+
 def obter_posicoes(): # aux
 	return range(1, DIMENSAO_TABULEIRO ** 2 + 1)
+
 
 def eh_posicao(pos):
 	return type(pos) == int and pos in obter_posicoes()
 
+
 def eh_numero_de_vetor(num): # aux
 	return type(num) == int and 1 <= num <= DIMENSAO_TABULEIRO
+
 
 def obter_coluna(tab, num_col):
 	if not (eh_tabuleiro(tab) and eh_numero_de_vetor(num_col)):
@@ -57,14 +63,16 @@ def obter_coluna(tab, num_col):
 	
 	return col
 
+
 def obter_linha(tab, num_linha):
 	if not (eh_tabuleiro(tab) and eh_numero_de_vetor(num_linha)):
 		raise ValueError("obter_linha: algum dos argumentos e invalido")
 
 	return tab[num_linha - 1]
 
+
 def obter_diagonal(tab, num_diagonal):
-	if not (eh_tabuleiro(tab) and type(num_diagonal) == int \
+	if not (eh_tabuleiro(tab) and type(num_diagonal) == int
 		and 1 <= num_diagonal <= 2):
 		raise ValueError("obter_diagonal: algum dos argumentos e invalido")
 
@@ -75,22 +83,26 @@ def obter_diagonal(tab, num_diagonal):
 	
 	return diag
 
+
 def eh_simbolo(simbolo):
-	return type(simbolo) == str and simbolo in ('X', 'O')
+	return type(simbolo) == str and simbolo in ("X", "O")
+
 
 def converter_simbolo_em_jogador(simbolo):
 	if not eh_simbolo(simbolo):
 		raise ValueError("converter_simbolo_em_jogador: o argumento e invalido")
 
-	return ({'X': 1, 'O': -1})[simbolo]
+	return ({"X": 1, "O": -1})[simbolo]
+
 
 def converter_jogador_em_simbolo(jogador): # aux
 	if jogador == 1:
-		return 'X'
+		return "X"
 	elif jogador == -1:
-		return 'O'
+		return "O"
 	else:
-		return ' '
+		return " "
+
 
 def tabuleiro_str(tab):
 	if not eh_tabuleiro(tab):
@@ -108,6 +120,7 @@ def tabuleiro_str(tab):
 
 	return res
 
+
 def obter_coordenadas(pos): # aux
 	if not eh_posicao(pos):
 		raise ValueError("obter_coordenadas: o argumento e invalido")
@@ -116,13 +129,15 @@ def obter_coordenadas(pos): # aux
 
 	return (linha, col)
 
+
 def obter_posicao(coords): # aux
-	if not (type(coords) == tuple and len(coords) == 2 \
-		and 0 <= coords[0] <= DIMENSAO_TABULEIRO - 1 \
+	if not (type(coords) == tuple and len(coords) == 2
+		and 0 <= coords[0] <= DIMENSAO_TABULEIRO - 1
 		and 0 <= coords[1] <= DIMENSAO_TABULEIRO - 1):
 		raise ValueError("obter_posicao: o argumento e invalido")
 	
 	return coords[0] * DIMENSAO_TABULEIRO + coords[1] + 1
+
 
 def obter_posicoes_adjacentes(pos): # aux
 	if not eh_posicao(pos):
@@ -140,6 +155,7 @@ def obter_posicoes_adjacentes(pos): # aux
 	
 	return adjs
 
+
 def obter_jogador(tab, pos): # aux
 	if not (eh_tabuleiro(tab) and eh_posicao(pos)):
 		raise ValueError("obter_jogador: algum dos argumentos e invalido")
@@ -148,11 +164,13 @@ def obter_jogador(tab, pos): # aux
 
 	return tab[coords[0]][coords[1]]
 
+
 def eh_posicao_livre(tab, pos):
 	if not (eh_tabuleiro(tab) and eh_posicao(pos)):
 		raise ValueError("eh_posicao_livre: algum dos argumentos e invalido")
 
 	return obter_jogador(tab, pos) == 0
+
 
 def obter_posicoes_livres(tab):
 	if not eh_tabuleiro(tab):
@@ -165,6 +183,7 @@ def obter_posicoes_livres(tab):
 	
 	return livres
 
+
 def vetor_ganhador(vetor): # aux
 	if not eh_vetor(vetor):
 		raise ValueError("vetor_ganhador: o argumento e invalido")
@@ -175,6 +194,7 @@ def vetor_ganhador(vetor): # aux
 		return jogador
 	else:
 		return 0
+
 
 def jogador_ganhador(tab):
 	if not eh_tabuleiro(tab):
@@ -195,11 +215,13 @@ def jogador_ganhador(tab):
 
 	return 0
 
+
 def eh_jogador(jogador): # aux
 	return type(jogador) == int and abs(jogador) == 1
 
+
 def marcar_posicao(tab, jogador, pos):
-	if not (eh_tabuleiro(tab) and eh_jogador(jogador) \
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador)
 		and eh_posicao(pos) and eh_posicao_livre(tab, pos)):
 		raise ValueError("marcar_posicao: algum dos argumentos e invalido")
 
@@ -217,27 +239,31 @@ def marcar_posicao(tab, jogador, pos):
 
 	return novo_tab
 
+
 def escolher_posicao_manual(tab):
 	if not eh_tabuleiro(tab):
 		raise ValueError("escolher_posicao_manual: o argumento e invalido")
 
-	escolha = int(input('Turno do jogador. Escolha uma posicao livre: '))
+	escolha = int(input("Turno do jogador. Escolha uma posicao livre: "))
 
 	if not (eh_posicao(escolha) and eh_posicao_livre(tab, escolha)):
-		raise ValueError("escolher_posicao_manual: " \
+		raise ValueError("escolher_posicao_manual: "
 			+ "a posicao introduzida e invalida")
 
 	return escolha
 
+
 def eh_estrategia(estrategia): # aux
 	return type(estrategia) == str and estrategia in (
-		'basico',
-		'normal',
-		'perfeito'
+		"basico",
+		"normal",
+		"perfeito"
 	)
+
 
 def obter_centro(): # aux
 	return (DIMENSAO_TABULEIRO ** 2) // 2 + 1 # posicao
+
 
 def obter_cantos(): # aux
 	return ( # por ordem de posicao
@@ -246,6 +272,7 @@ def obter_cantos(): # aux
 		DIMENSAO_TABULEIRO * (DIMENSAO_TABULEIRO - 1) + 1,
 		DIMENSAO_TABULEIRO ** 2,
 	)
+
 
 def obter_bifurcacoes(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
@@ -273,20 +300,23 @@ def obter_bifurcacoes(tab, jogador): # aux
 	
 	return bifurcacoes
 
+
 def criterio_vitoria(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_vitoria: algum dos argumentos e invalido")
 
 	for pos in obter_posicoes():
-		if eh_posicao_livre(tab, pos) \
-			and jogador_ganhador(marcar_posicao(tab, jogador, pos)) == jogador:
+		if (eh_posicao_livre(tab, pos)
+			and jogador_ganhador(marcar_posicao(tab, jogador, pos)) == jogador):
 			return pos
+
 
 def criterio_bloqueio(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
 		raise ValueError("criterio_bloqueio: algum dos argumentos e invalido")
 
 	return criterio_vitoria(tab, -jogador)
+
 
 def criterio_bifurcacao(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
@@ -296,10 +326,11 @@ def criterio_bifurcacao(tab, jogador): # aux
 	if len(bifurcacoes) > 0:
 		return bifurcacoes[0]
 
+
 def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
-		raise ValueError("criterio_bloqueio_bifurcacao: " + \
-			"algum dos argumentos e invalido")
+		raise ValueError("criterio_bloqueio_bifurcacao: "
+			+ "algum dos argumentos e invalido")
 
 	bifurcacoes = obter_bifurcacoes(tab, -jogador)
 	lb = len(bifurcacoes)
@@ -310,13 +341,14 @@ def criterio_bloqueio_bifurcacao(tab, jogador): # aux
 		for pos in obter_posicoes():
 			if obter_jogador(tab, pos) == jogador:
 				for adj in obter_posicoes_adjacentes(pos):
-					if eh_posicao_livre(tab, adj) \
-						and adj not in posicoes_para_2_em_linha:
+					if (eh_posicao_livre(tab, adj)
+						and adj not in posicoes_para_2_em_linha):
 						posicoes_para_2_em_linha += (adj,)
 		for pos in posicoes_para_2_em_linha:
 				novo_tab = marcar_posicao(tab, jogador, pos)
 				if criterio_bloqueio(novo_tab, -jogador) not in bifurcacoes:
 					return pos
+
 
 def criterio_centro(tab, jogador): # aux
 	if not eh_tabuleiro(tab):
@@ -326,18 +358,20 @@ def criterio_centro(tab, jogador): # aux
 	if eh_posicao_livre(tab, centro):
 		return centro
 
+
 def criterio_canto_oposto(tab, jogador): # aux
 	if not (eh_tabuleiro(tab) and eh_jogador(jogador)):
-		raise ValueError("criterio_canto_oposto: " + \
-			"algum dos argumentos e invalido")
+		raise ValueError("criterio_canto_oposto: "
+			+ "algum dos argumentos e invalido")
 
 	cantos = obter_cantos()
 
 	for i in range(len(cantos)):
 		oposto = len(cantos) - 1 - i
-		if eh_posicao_livre(tab, cantos[i]) \
-			and obter_jogador(tab, cantos[oposto]) == -jogador:
+		if (eh_posicao_livre(tab, cantos[i])
+			and obter_jogador(tab, cantos[oposto]) == -jogador):
 			return cantos[i]
+
 
 def criterio_canto_vazio(tab, jogador): # aux
 	if not eh_tabuleiro(tab):
@@ -348,6 +382,7 @@ def criterio_canto_vazio(tab, jogador): # aux
 	for pos in cantos:
 		if eh_posicao_livre(tab, pos):
 			return pos
+
 
 def criterio_lateral_vazio(tab, jogador): # aux
 	if not eh_tabuleiro(tab):
@@ -360,11 +395,12 @@ def criterio_lateral_vazio(tab, jogador): # aux
 		if pos != centro and (pos not in cantos) and eh_posicao_livre(tab, pos):
 			return pos
 
+
 def escolher_posicao_auto(tab, jogador, estrategia):
-	if not (eh_tabuleiro(tab) and eh_jogador(jogador) \
+	if not (eh_tabuleiro(tab) and eh_jogador(jogador)
 		and eh_estrategia(estrategia)):
-		raise ValueError("escolher_posicao_auto: " + \
-			"algum dos argumentos e invalido")
+		raise ValueError("escolher_posicao_auto: "
+			+ "algum dos argumentos e invalido")
 	
 	crits_perfeitos = estrategia == "perfeito"
 	crits_normais = crits_perfeitos or estrategia == "normal"
@@ -390,6 +426,7 @@ def escolher_posicao_auto(tab, jogador, estrategia):
 	
 	raise RuntimeError("escolher_posicao_auto: nenhum criterio foi aplicado")
 
+
 def jogo_do_galo(simbolo_humano, estrategia):
 	if not (eh_simbolo(simbolo_humano) and eh_estrategia(estrategia)):
 		raise ValueError("jogo_do_galo: algum dos argumentos e invalido")
@@ -407,7 +444,7 @@ def jogo_do_galo(simbolo_humano, estrategia):
 		if jogador_atual == jogador_humano:
 			escolha = escolher_posicao_manual(tabuleiro)
 		else:
-			print('Turno do computador (' + estrategia + '):')
+			print("Turno do computador (" + estrategia + "):")
 			escolha = escolher_posicao_auto(
 				tabuleiro,
 				jogador_atual,
@@ -421,6 +458,6 @@ def jogo_do_galo(simbolo_humano, estrategia):
 		if ganhador:
 			return converter_jogador_em_simbolo(ganhador)
 		elif len(obter_posicoes_livres(tabuleiro)) == 0:
-			return 'EMPATE'
+			return "EMPATE"
 		
 		jogador_atual = -jogador_atual
